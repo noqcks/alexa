@@ -1,17 +1,12 @@
+'use strict';
 
 exports.handler = function (event, context) {
     try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
 
-        /**
-         * Uncomment this if statement and populate with your skill's application ID to
-         * prevent someone else from configuring a skill that sends requests to this function.
-         */
-        /*
-        if (event.session.application.applicationId !== "amzn1.echo-sdk-ams.app.[unique-value-here]") {
+        if (event.session.application.applicationId !== "amzn1.echo-sdk-ams.app.73ef0089-042c-4eb1-bd13-e11448f90da0") {
              context.fail("Invalid Application ID");
         }
-        */
 
         if (event.session.new) {
             onSessionStarted({requestId: event.request.requestId}, event.session);
@@ -64,12 +59,14 @@ function onIntent(intentRequest, session, callback) {
     console.log("onIntent requestId=" + intentRequest.requestId +
         ", sessionId=" + session.sessionId);
 
-    var intent = intentRequest.intent,
-        intentName = intentRequest.intent.name;
+    var intent = intentRequest.intent;
+    var intentName = intentRequest.intent.name;
 
     // Dispatch to your skill's intent handlers
     if ("CompareProducts" === intentName) {
         compareProducts(intent, session, callback);
+    } else if ("GetSentiment" === intentName) {
+        getSentiment(intent, session, callback);
     } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
@@ -123,32 +120,55 @@ function compareProducts(intent, session, callback){
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
-function getSentimentScore(product){
+function getSentiment(intent, session, callback) {
+    var subject = intent.slots.Subject.value;
+    // var duration = intent.slots.Duration.value;
+
+    var sentimentScore = getSentimentScore(subject);
+    if (sentimentScore > 0) {
+        speechOutput = "There is a positive sentiment for " + subject;
+        repromptText = "";
+    } else if (sentimentScore < 0) {
+        speechOutput = "There is a negative sentiment for " + subject;
+        repromptText = "";
+    } else if (sentimentScore == 0) {
+        speechOutput = "There is a neutral sentiment for " + subject;
+        repromptText = "";
+    } else {
+        speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
+        repromptText = "";
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function getSentimentScore(subject){
     var request = require('request');
     var result;
 
-    const SECONDS_IN_3_MONTHS = 5183000
-    const API_KEY = "bd7c7669ef0faf4508d5c72ab735ac1de3ddfd2b"
+    var SECONDS_IN_2_MONTHS = 5183000;
+    var API_KEY = "bd7c7669ef0faf4508d5c72ab735ac1de3ddfd2b";
 
     var end = Math.floor(Date.now() / 1000);
-    var start = end - SECONDS_IN_3_MONTHS
-    var query = 'apple'
+    var start = end - SECONDS_IN_2_MONTHS;
+    // var query = 'apple'
 
-    var url = `https://gateway-a.watsonplatform.net/calls/data/GetNews?apikey=${API_KEY}&return=enriched.url.enrichedTitle.docSentiment&start=${start}&end=${end}&q.enriched.url.cleanedTitle=${query}&count=20&outputMode=json`
+    var url = "https://gateway-a.watsonplatform.net/calls/data/GetNews?apikey=" + API_KEY + "&return=enriched.url.enrichedTitle.docSentiment&start=" + start + "&end=" + end + "&q.enriched.url.cleanedTitle=" + subject + "&count=20&outputMode=json";
 
     request(url, function (error, response, body) {
-      if (error) console.log(error)
+      if (error) console.log(error);
       if (!error && response.statusCode == 200) {
         // console.log(JSON.parse(body))
 
         var results = JSON.parse(body).result.docs
-        var count = 0
-        var score = 0
+        var count = 0;
+        var score = 0;
         for (var i in results) {
-          count++
-          score += results[i].source.enriched.url.enrichedTitle.docSentiment.score
+          count++;
+          score += results[i].source.enriched.url.enrichedTitle.docSentiment.score;
         }
-        result = score/count
+        result = score/count;
         return result;
       }
     })
