@@ -123,7 +123,11 @@ function compareProducts(intent, session, callback){
 function getSentiment(intent, session, callback) {
     var subject = intent.slots.Subject.value;
     // var duration = intent.slots.Duration.value;
-
+    var sessionAttributes = {};
+    var speechOutput = "";
+    var repromptText = "";
+    var shouldEndSession = false;
+    var cardTitle = intent.name;
     var sentimentScore = getSentimentScore(subject);
     if (sentimentScore > 0) {
         speechOutput = "There is a positive sentiment for " + subject;
