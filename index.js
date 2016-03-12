@@ -148,31 +148,32 @@ function getSentimentScore(subject, intent, callback){
         var cardTitle = intent.name;
       if (!error && response.statusCode == 200) {
         // console.log(JSON.parse(body))
-        var sentimentScore;
-        var results = JSON.parse(body).result.docs
-        var count = 0;
-        var score = 0;
-        for (var i in results) {
-          count++;
-          score += results[i].source.enriched.url.enrichedTitle.docSentiment.score;
-        }
-        result = score/count;
-        sentimentScore = result;
+        if (JSON.parse(body).result.docs) {
+            var sentimentScore;
+            var results = JSON.parse(body).result.docs
+            var count = 0;
+            var score = 0;
+            for (var i in results) {
+              count++;
+              score += results[i].source.enriched.url.enrichedTitle.docSentiment.score;
+            }
+            result = score/count;
+            sentimentScore = result;
 
-        if (sentimentScore > 0) {
-            speechOutput = "There is a positive sentiment for " + subject;
-            repromptText = "";
-        } else if (sentimentScore < 0) {
-            speechOutput = "There is a negative sentiment for " + subject;
-            repromptText = "";
-        } else if (sentimentScore == 0) {
-            speechOutput = "There is a neutral sentiment for " + subject;
-            repromptText = "";
-        } else {
-            speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
-            repromptText = "";
+            if (sentimentScore > 0) {
+                speechOutput = "There is a positive sentiment for " + subject;
+                repromptText = "";
+            } else if (sentimentScore < 0) {
+                speechOutput = "There is a negative sentiment for " + subject;
+                repromptText = "";
+            } else if (sentimentScore == 0) {
+                speechOutput = "There is a neutral sentiment for " + subject;
+                repromptText = "";
+            } else {
+                speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
+                repromptText = "";
+            }
         }
-
       }
         callback(sessionAttributes,
             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
