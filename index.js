@@ -4,10 +4,6 @@ exports.handler = function (event, context) {
     try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
 
-        if (event.session.application.applicationId !== "amzn1.echo-sdk-ams.app.73ef0089-042c-4eb1-bd13-e11448f90da0") {
-             context.fail("Invalid Application ID");
-        }
-
         if (event.session.new) {
             onSessionStarted({requestId: event.request.requestId}, event.session);
         }
@@ -90,7 +86,7 @@ function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Welcome";
-    var speechOutput = "Welcome to the sentiment analyzer. I will give you the sentiment of an item for the last two months. Simply ask me what people think of a product or company.";
+    var speechOutput = "Welcome to the sentiment analyzer. I can give you the recent sentiment for almost anytging. Simply ask me what people think of a product or company.";
 
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
