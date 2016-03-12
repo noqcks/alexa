@@ -123,31 +123,12 @@ function compareProducts(intent, session, callback){
 function getSentiment(intent, session, callback) {
     var subject = intent.slots.Subject.value;
     // var duration = intent.slots.Duration.value;
-    var sessionAttributes = {};
-    var speechOutput = "";
-    var repromptText = "";
-    var shouldEndSession = false;
-    var cardTitle = intent.name;
-    var sentimentScore = getSentimentScore(subject);
-    if (sentimentScore > 0) {
-        speechOutput = "There is a positive sentiment for " + subject;
-        repromptText = "";
-    } else if (sentimentScore < 0) {
-        speechOutput = "There is a negative sentiment for " + subject;
-        repromptText = "";
-    } else if (sentimentScore == 0) {
-        speechOutput = "There is a neutral sentiment for " + subject;
-        repromptText = "";
-    } else {
-        speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
-        repromptText = "";
-    }
-
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+ 
+    getSentimentScore(subject, intent, callback);
+    
 }
 
-function getSentimentScore(subject){
+function getSentimentScore(subject, intent, callback){
     var request = require('request');
     var result;
 
@@ -162,9 +143,14 @@ function getSentimentScore(subject){
 
     request(url, function (error, response, body) {
       if (error) console.log(error);
+        var sessionAttributes = {};
+        var speechOutput = "";
+        var repromptText = "";
+        var shouldEndSession = false;
+        var cardTitle = intent.name;
       if (!error && response.statusCode == 200) {
         // console.log(JSON.parse(body))
-
+        var sentimentScore;
         var results = JSON.parse(body).result.docs
         var count = 0;
         var score = 0;
@@ -173,10 +159,26 @@ function getSentimentScore(subject){
           score += results[i].source.enriched.url.enrichedTitle.docSentiment.score;
         }
         result = score/count;
-        return result;
-      }
-    })
+        sentimentScore = result;
+        
+        if (sentimentScore > 0) {
+            speechOutput = "There is a positive sentiment for " + subject;
+            repromptText = "";
+        } else if (sentimentScore < 0) {
+            speechOutput = "There is a negative sentiment for " + subject;
+            repromptText = "";
+        } else if (sentimentScore == 0) {
+            speechOutput = "There is a neutral sentiment for " + subject;
+            repromptText = "";
+        } else {
+            speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
+            repromptText = "";
+        }
 
+      }
+        callback(sessionAttributes,
+            buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    })
 }
 
 /**
