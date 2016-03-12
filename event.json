@@ -1,0 +1,29 @@
+{
+  "session": {
+    "sessionId": "SessionId.8555695b-192c-49d7-8d31-cf24691d6658",
+    "application": {
+      "applicationId": "amzn1.echo-sdk-ams.app.73ef0089-042c-4eb1-bd13-e11448f90da0"
+    },
+    "user": {
+      "userId": "amzn1.echo-sdk-account.AFWVCZVZD3BKOPGPJBROK7FAVNDPRK33PGMHCQNRZIURP7EUMWLD4"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.e384a95c-51ba-4f0f-9ca0-155621c3532a",
+    "timestamp": "2016-03-12T18:44:18Z",
+    "intent": {
+      "name": "GetSentiment",
+      "slots": {
+        "Duration": {
+          "name": "Duration"
+        },
+        "Subject": {
+          "name": "Subject",
+          "value": "google"
+        }
+      }
+    }
+  }
+}
