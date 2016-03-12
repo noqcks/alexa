@@ -6,7 +6,9 @@
   "dependencies": {
     "request": "^2.52.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "node-lambda": "^0.7.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
