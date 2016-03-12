@@ -86,7 +86,7 @@ function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Welcome";
-    var speechOutput = "Welcome to the sentiment analyzer. I can give you the recent sentiment for almost anytging. Simply ask me what people think of a product or company.";
+    var speechOutput = "Welcome to the sentiment analyzer. Ask me what people think of a product or company.";
 
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
@@ -127,7 +127,7 @@ function getSentimentScore(subject, intent, callback){
     var result;
 
     var SECONDS_IN_2_MONTHS = 5183000;
-    var API_KEY = "65d02f5717b588825ff508d933c15f08a6a43117";
+    var API_KEY = "f94ff9dce127d2bbed908d9cbbf46d911b8b15fd";
 
     var end = Math.floor(Date.now() / 1000);
     var start = end - SECONDS_IN_2_MONTHS;
@@ -154,13 +154,13 @@ function getSentimentScore(subject, intent, callback){
               score += results[i].source.enriched.url.enrichedTitle.docSentiment.score;
             }
             result = score/count;
-            sentimentScore = result;
+            sentimentScore =  Math.round(result*10000)/10000;
 
             if (sentimentScore > 0) {
-                speechOutput = "There is a positive sentiment for " + subject;
+                speechOutput = "There is a positive sentiment for " + subject + "with a score of " + sentimentScore;
                 repromptText = "";
             } else if (sentimentScore < 0) {
-                speechOutput = "There is a negative sentiment for " + subject;
+                speechOutput = "There is a negative sentiment for " + subject + "with a score of " + sentimentScore;
                 repromptText = "";
             } else if (sentimentScore == 0) {
                 speechOutput = "There is a neutral sentiment for " + subject;
