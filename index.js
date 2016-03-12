@@ -90,40 +90,38 @@ function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Welcome";
-    var speechOutput = "Welcome to product chooser. I will compare two products from the sentiments obtained from various sources" +
-        "You can ask me by saying compare product1 and product2";
+    var speechOutput = "Welcome to the sentiment analyzer. I will give you the sentiment of an item for the last two months. Simply ask me what people think of a product or company.";
+
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "You can ask me by saying compare product1 and product2";
+    var repromptText = "Just say: What do people think of google?";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
-function compareProducts(intent, session, callback){
-    var product1 = intent.slots.ProductOne.value;
-    var product2 = intent.slots.ProductTwo.value;
-    var cardTitle = intent.name;
-    var repromptText = "";
-    var sessionAttributes = {};
-    var shouldEndSession = false;
-    var speechOutput = "";
+// function compareProducts(intent, session, callback){
+//     var product1 = intent.slots.ProductOne.value;
+//     var product2 = intent.slots.ProductTwo.value;
+//     var cardTitle = intent.name;
+//     var repromptText = "";
+//     var sessionAttributes = {};
+//     var shouldEndSession = false;
+//     var speechOutput = "";
 
-    if (product1 && product2){
-        speechOutput = "Product 1 is " + product1 + " Product 2 is " + product2;
-        var product1Score = getSentimentScore(product1);
-        var product2Score = getSentimentScore(product2);
-        repromptText = "";
-    }
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-}
+//     if (product1 && product2){
+//         speechOutput = "Product 1 is " + product1 + " Product 2 is " + product2;
+//         var product1Score = getSentimentScore(product1);
+//         var product2Score = getSentimentScore(product2);
+//         repromptText = "";
+//     }
+//     callback(sessionAttributes,
+//          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+// }
 
 function getSentiment(intent, session, callback) {
     var subject = intent.slots.Subject.value;
-    // var duration = intent.slots.Duration.value;
-
     getSentimentScore(subject, intent, callback);
 
 }
@@ -133,7 +131,7 @@ function getSentimentScore(subject, intent, callback){
     var result;
 
     var SECONDS_IN_2_MONTHS = 5183000;
-    var API_KEY = "bd7c7669ef0faf4508d5c72ab735ac1de3ddfd2b";
+    var API_KEY = "65d02f5717b588825ff508d933c15f08a6a43117";
 
     var end = Math.floor(Date.now() / 1000);
     var start = end - SECONDS_IN_2_MONTHS;
@@ -179,65 +177,6 @@ function getSentimentScore(subject, intent, callback){
         callback(sessionAttributes,
             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     })
-}
-
-/**
- * Sets the color in the session and prepares the speech to reply to the user.
- */
-function setColorInSession(intent, session, callback) {
-    var cardTitle = intent.name;
-    var favoriteColorSlot = intent.slots.Color;
-    var repromptText = "";
-    var sessionAttributes = {};
-    var shouldEndSession = false;
-    var speechOutput = "";
-
-    if (favoriteColorSlot) {
-        var favoriteColor = favoriteColorSlot.value;
-        sessionAttributes = createFavoriteColorAttributes(favoriteColor);
-        speechOutput = "I now know your favorite color is " + favoriteColor + ". You can ask me " +
-            "your favorite color by saying, what's my favorite color?";
-        repromptText = "You can ask me your favorite color by saying, what's my favorite color?";
-    } else {
-        speechOutput = "I'm not sure what your favorite color is. Please try again";
-        repromptText = "I'm not sure what your favorite color is. You can tell me your " +
-            "favorite color by saying, my favorite color is red";
-    }
-
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-}
-
-function createFavoriteColorAttributes(favoriteColor) {
-    return {
-        favoriteColor: favoriteColor
-    };
-}
-
-function getColorFromSession(intent, session, callback) {
-    var favoriteColor;
-    var repromptText = null;
-    var sessionAttributes = {};
-    var shouldEndSession = false;
-    var speechOutput = "";
-
-    if (session.attributes) {
-        favoriteColor = session.attributes.favoriteColor;
-    }
-
-    if (favoriteColor) {
-        speechOutput = "Your favorite color is " + favoriteColor + ". Goodbye.";
-        shouldEndSession = true;
-    } else {
-        speechOutput = "I'm not sure what your favorite color is, you can say, my favorite color " +
-            " is red";
-    }
-
-    // Setting repromptText to null signifies that we do not want to reprompt the user.
-    // If the user does not respond or says something that is not understood, the session
-    // will end.
-    callback(sessionAttributes,
-         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
 // --------------- Helpers that build all of the responses -----------------------
