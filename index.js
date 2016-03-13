@@ -92,7 +92,7 @@ function getWelcomeResponse(callback) {
 
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "Just say: What do people think of google?";
+    var repromptText = "Just say: What do people think of google?, Or you can ask me for news about an entity";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
@@ -198,20 +198,25 @@ function getSentimentScore(subject, intent, callback){
             }
             result = score/count;
             sentimentScore =  Math.round(result*10000)/10000;
-
-            if (sentimentScore > 0) {
-                speechOutput = "There is a positive sentiment for " + subject + "with a score of " + sentimentScore;
-                repromptText = "";
-            } else if (sentimentScore < 0) {
-                speechOutput = "There is a negative sentiment for " + subject + "with a score of " + sentimentScore;
-                repromptText = "";
-            } else if (sentimentScore == 0) {
-                speechOutput = "There is a neutral sentiment for " + subject;
+            if (!subject){
+                speechOutput = "";
                 repromptText = "";
             } else {
-                speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
+                if (sentimentScore > 0) {
+                speechOutput = "There is a positive sentiment for " + subject + "with a score of " + sentimentScore;
                 repromptText = "";
+                } else if (sentimentScore < 0) {
+                    speechOutput = "There is a negative sentiment for " + subject + "with a score of " + sentimentScore;
+                    repromptText = "";
+                } else if (sentimentScore == 0) {
+                    speechOutput = "There is a neutral sentiment for " + subject;
+                    repromptText = "";
+                } else {
+                    speechOutput = "I'm sorry, I don't have enough data to analyze the sentiment of " + subject;
+                    repromptText = "";
+                }
             }
+           
         }
       }
         callback(sessionAttributes,
