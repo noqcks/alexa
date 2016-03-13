@@ -65,6 +65,8 @@ function onIntent(intentRequest, session, callback) {
         getSentiment(intent, session, callback);
     } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
+    } else if ("GetNews" == intentName) {
+        getNews(intent, session, callback);
     } else {
         throw "Invalid intent";
     }
@@ -120,6 +122,47 @@ function getSentiment(intent, session, callback) {
     var subject = intent.slots.Subject.value;
     getSentimentScore(subject, intent, callback);
 
+}
+
+function getNews(intent, session, callback){
+    var subject = intent.slots.Subject.value;
+    var request = require('request');
+    var result;
+    var SECONDS_IN_2_MONTHS = 5183000;
+    var API_KEY = "f94ff9dce127d2bbed908d9cbbf46d911b8b15fd";
+    var end = Math.floor(Date.now() / 1000);
+    var start = end - SECONDS_IN_2_MONTHS;
+    var url = "https://gateway-a.watsonplatform.net/calls/data/GetNews?apikey=" + API_KEY + "&outputMode=json&start="+start+"&end="+end+"&q.enriched.url.enrichedTitle.entities.entity.text="+subject+"&count=10&return=enriched.url.url,enriched.url.title";
+    console.log(url);
+    request(url, function (error, response, body) {
+      if (error) console.log(error);
+        var sessionAttributes = {};
+        var speechOutput = "";
+        var repromptText = "";
+        var shouldEndSession = false;
+        var cardTitle = intent.name;
+      if (!error && response.statusCode == 200) {
+        // console.log(JSON.parse(body))
+        if (JSON.parse(body).result.docs) {
+            var result = JSON.parse(body).result;
+            var count = result.docs.length;
+            var x = Math.floor((Math.random() * count));
+            var newsTitle = result.docs[x].source.enriched.url.title;
+            if (newsTitle){
+                speechOutput = newsTitle;
+                repromptText = "";
+            } else {
+                speechOutput = "I'm sorry, I couldn't find any news for " + subject;
+                repromptText = "";
+            }
+        } else {
+            speechOutput = "I'm sorry, I couldn't find any news for " + subject;
+            repromptText = "";
+        }
+      }
+        callback(sessionAttributes,
+            buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    });
 }
 
 function getSentimentScore(subject, intent, callback){
